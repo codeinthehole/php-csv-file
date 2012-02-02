@@ -26,7 +26,7 @@ Process a raw CSV into a new one::
 
     $pathToSourceFile = '/path/to/rawfile.csv';
     $inFile = new CSV_File($pathToFile);
-    $inFile->setColumnNames(array('name', 'age');
+    $inFile->setColumnNames(array('name', 'age'));
 
     $pathToDesinationFile = '/path/to/file.csv';
     $outFile = new CSV_File($pathToDestinationFile);
