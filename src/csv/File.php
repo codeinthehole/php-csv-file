@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__.'/Iterator.php';
+namespace codeinthehole\csv;
 
 /**
  * CSV file object
  */
-class CSV_File implements IteratorAggregate
+class File implements \IteratorAggregate
 {
 
 	/**
@@ -37,34 +37,49 @@ class CSV_File implements IteratorAggregate
     protected $filePointer;
 
     /**
+	 * Delimiter for csv values.
+	 *
      * @var string
      */
     private $fieldDelimiter = self::DEFAULT_DELIMITER;
 
     /**
+	 * Delimiters for fields in one csv field.
+	 *
      * @var string
      */
     private $fieldEnclosure = self::DEFAULT_ENCLOSURE;
 
     /**
+	 * Delimiter for a dataset.
+	 *
      * @var string
      */
     private $lineTerminator = PHP_EOL;
 
     /**
-     * @var string
-     */
-    private $iteratorClass = 'CSV_Iterator';
-
-    /**
+	 * Determines if the writer shell append to current file.
+	 *
      * @var boolean
      */
     private $append = false;
 
+	/**
+	 * Stores Iterator instance.
+	 *
+	 * @var Iterator;
+	 */
+	private $iterator;
+
+	/**
+	 * Stores column names.
+	 *
+	 * @var array
+	 */
     private $columnNames;
 
     /**
-     * Constructor only takes a full CSV file path and inits class properties
+     * Constructor only takes a full CSV file path and inits class properties.
      *
      * @param string $pathToFile
      * @param boolean $append If true then we will not truncate the file but allow appending to an existing file.
@@ -78,7 +93,7 @@ class CSV_File implements IteratorAggregate
 
     /**
      * @param string $delimiter
-     * @return CSV_File
+     * @return File
      */
     public function setFieldDelimiter($delimiter)
     {
@@ -88,7 +103,7 @@ class CSV_File implements IteratorAggregate
 
     /**
      * @param string $enclosure
-     * @return CSV_File
+     * @return File
      */
     public function setFieldEnclosure($enclosure)
     {
@@ -98,7 +113,7 @@ class CSV_File implements IteratorAggregate
 
     /**
      * @param string $terminator
-     * @return CSV_File
+     * @return File
      */
     public function setLineTerminator($terminator)
     {
@@ -108,7 +123,7 @@ class CSV_File implements IteratorAggregate
 
     /**
      * @param array $names
-     * @return CSV_File
+     * @return File
      */
     public function setColumnNames(array $names)
     {
@@ -116,15 +131,15 @@ class CSV_File implements IteratorAggregate
     }
 
     /**
-     * Set a custom itertor class to use when looping over the data.
-     * This should be a subclass of CSV_FileIterator
+     * Set a custom itertor to use when looping over the data.
+     * This should be a subclass of codeinthehole\csv\FileIterator
      *
-     * @param string $className
-     * @return CSV_File
+     * @param codeinthehole\csv\Iterator $iterator
+     * @return codeinthehole\csv\File
      */
-    public function setIteratorClass($className)
+    public function setIterator($iterator)
     {
-        $this->iteratorClass = $className;
+        $this->iterator = $iterator;
         return $this;
     }
 
@@ -169,7 +184,7 @@ class CSV_File implements IteratorAggregate
      * Output contents of the array into a single line in CSV file, with separator specified in class constant
      *
      * @param array $contentArray
-     * @return mixed
+     * @return File
      */
     public function write(array $contentArray)
     {
@@ -185,7 +200,7 @@ class CSV_File implements IteratorAggregate
 
     /**
      * @param array $contentMultiArray
-     * @return CSV_File
+     * @return File
      */
     public function writeAll(array $contentMultiArray)
     {
@@ -268,19 +283,30 @@ class CSV_File implements IteratorAggregate
     }
 
     /**
-     * @return CSV_Iterator
+     * @return Iterator
      */
-    public function getIterator()
+    public function buildIterator()
     {
         if (!$this->exists()) {
             throw new RuntimeException("The file $this->pathToFile does not exist");
         }
-        $class = new $this->iteratorClass($this->pathToFile, $this->fieldDelimiter, $this->fieldEnclosure);
+        $iterator = new Iterator($this->pathToFile, $this->fieldDelimiter, $this->fieldEnclosure);
         if ($this->columnNames) {
-            $class->setColumnNames($this->columnNames);
+            $iterator->setColumnNames($this->columnNames);
         }
-        return $class;
+        return $iterator;
     }
+
+	/**
+	 * @return Iterator
+	 */
+	public function getIterator()
+	{
+		if (!$this->iterator) {
+			$this->iterator = $this->buildIterator();
+		}
+		return $this->iterator;
+	}
 
     /**
      * @return int

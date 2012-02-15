@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__.'/../CSV/File.php';
+require_once __DIR__.'/../src/csv/File.php';
+require_once __DIR__.'/../src/csv/Iterator.php';
+
+use codeinthehole\csv\File;
 
 class FileTest extends PHPUnit_Framework_TestCase
 {
@@ -33,7 +36,7 @@ class FileTest extends PHPUnit_Framework_TestCase
     public function testWritingDataCreatesAFile()
     {
         $filePath = $this->createTemporaryFilePath();
-        $file = new CSV_File($filePath);
+        $file = new File($filePath);
         $file->write($this->sampleRows[0]);
         $this->assertTrue(file_exists($filePath));
     }
@@ -41,17 +44,17 @@ class FileTest extends PHPUnit_Framework_TestCase
     public function testWritingDataCanBeReadBack()
     {
         $filePath = $this->createTemporaryFilePath();
-        $file = new CSV_File($filePath);
+        $file = new File($filePath);
         $file->write($this->sampleRows[0]);
 
-        $newFile = new CSV_File($filePath);
+        $newFile = new File($filePath);
         $this->assertSame(1, $newFile->getNumLines());
     }
 
     public function testMultilineWrite()
     {
         $filePath = $this->createTemporaryFilePath();
-        $file = new CSV_File($filePath);
+        $file = new File($filePath);
         $file->writeAll($this->sampleRows);
         $this->assertSame(count($this->sampleRows), $file->getNumLines());
     }
@@ -59,11 +62,11 @@ class FileTest extends PHPUnit_Framework_TestCase
     public function testWrittenDataCanBeReadThroughIterator()
     {
         $filePath = $this->createTemporaryFilePath();
-        $file = new CSV_File($filePath);
+        $file = new File($filePath);
         $data = $this->sampleRows[0];
         $file->write($data);
 
-        $newFile = new CSV_File($filePath);
+        $newFile = new File($filePath);
         foreach ($newFile as $index => $row) {
             if ($index == 0) $this->assertSame($data, $row);
         }
@@ -72,7 +75,7 @@ class FileTest extends PHPUnit_Framework_TestCase
     public function testGetNamedColumnsBack()
     {
         $filePath = $this->createTemporaryFilePath();
-        $file = new CSV_File($filePath);
+        $file = new File($filePath);
         $file->setColumnNames(array('id', 'name', 'year'));
         $file->write($this->sampleRows[0]);
         foreach ($file as $row) {

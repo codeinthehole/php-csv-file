@@ -11,7 +11,7 @@ Reading data out of a CSV file::
 
     $pathToFile = '/path/to/file.csv';
     $file = new CSV_File($pathToFile);
-    $file->setFieldDelimiter('|'); // optional 
+    $file->setFieldDelimiter('|'); // optional
     foreach ($file as $row) {
         do_something_with($row['name'], $row['age']);
     }
@@ -21,7 +21,7 @@ Writing::
     $pathToFile = '/path/to/file.csv';
     $file = new CSV_File($pathToFile);
     $file->write('col1', 'col2', 'col3');
-    
+
 Process a raw CSV into a new one::
 
     $pathToSourceFile = '/path/to/rawfile.csv';
@@ -48,6 +48,8 @@ Features
 
 * Set names of columns for more readable code
 * Uses a ``SplFileObject`` as an iterator, which can be subclassed or overridden for custom behaviour.
+* Fluent Interface
+* PSR-0 compatible
 
 To come
 -------

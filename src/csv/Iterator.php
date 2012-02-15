@@ -1,8 +1,11 @@
 <?php
+
+namespace codeinthehole\csv;
+
 /**
  * Simple iterator for a CSV file
  */
-class CSV_Iterator extends SplFileObject
+class Iterator extends \SplFileObject
 {
     protected $names;
 
@@ -15,9 +18,9 @@ class CSV_Iterator extends SplFileObject
     public function __construct($pathToFile, $delimiter=",", $fieldEnclosure='"', $escapeChar='\\')
     {
         parent::__construct($pathToFile, 'r');
-        $this->setFlags(SplFileObject::READ_CSV);
+        $this->setFlags(\SplFileObject::READ_CSV);
         $this->setCsvControl($delimiter, $fieldEnclosure, $escapeChar);
-    }  
+    }
 
     /**
      * @param array $names
@@ -45,9 +48,9 @@ class CSV_Iterator extends SplFileObject
     public function valid()
     {
         $current = $this->current();
-        if ($this->names) { 
+        if ($this->names) {
             return count($current) == count($this->names);
-        } 
+        }
         return parent::valid();
     }
 }
