@@ -10,7 +10,7 @@ Sample usage
 Reading data out of a CSV file::
 
     $pathToFile = '/path/to/file.csv';
-    $file = new CSV_File($pathToFile);
+    $file = new codeinthehole\csv\File($pathToFile);
     $file->setFieldDelimiter('|'); // optional
     foreach ($file as $row) {
         do_something_with($row['name'], $row['age']);
@@ -19,17 +19,17 @@ Reading data out of a CSV file::
 Writing::
 
     $pathToFile = '/path/to/file.csv';
-    $file = new CSV_File($pathToFile);
+    $file = new codeinthehole\csv\File($pathToFile);
     $file->write('col1', 'col2', 'col3');
 
 Process a raw CSV into a new one::
 
     $pathToSourceFile = '/path/to/rawfile.csv';
-    $inFile = new CSV_File($pathToFile);
+    $inFile = new codeinthehole\csv\File($pathToFile);
     $inFile->setColumnNames(array('name', 'age'));
 
     $pathToDesinationFile = '/path/to/file.csv';
-    $outFile = new CSV_File($pathToDestinationFile);
+    $outFile = new codeinthehole\csv\File($pathToDestinationFile);
 
     foreach ($inFile as $inRow) {
         if ($inRow['age'] < 21) {
