@@ -18,8 +18,8 @@ class FileTest extends PHPUnit_Framework_TestCase
 
     private function createTemporaryFilePath()
     {
-        $template = '/tmp/csv-test-%s.csv';
-        $trace = debug_backtrace();
+        $template = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'csv-test-%s.csv';
+		$trace = debug_backtrace();
         $testMethod = $trace[1]['function'];
         $filePath = sprintf($template, $testMethod);
         $this->temporaryFiles[] = $filePath;
@@ -63,12 +63,12 @@ class FileTest extends PHPUnit_Framework_TestCase
     {
         $filePath = $this->createTemporaryFilePath();
         $file = new File($filePath);
-        $data = $this->sampleRows[0];
-        $file->write($data);
+        $data = $this->sampleRows;
+        $file->writeAll($data);
 
         $newFile = new File($filePath);
         foreach ($newFile as $index => $row) {
-            if ($index == 0) $this->assertSame($data, $row);
+            $this->assertSame($this->sampleRows[$index], $row);
         }
     }
 
