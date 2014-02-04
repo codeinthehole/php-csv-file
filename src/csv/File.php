@@ -1,55 +1,85 @@
 <?php
 
-require_once __DIR__.'/Iterator.php';
+namespace codeinthehole\csv;
 
 /**
  * CSV file object
  */
-class CSV_File implements IteratorAggregate
+class File implements \IteratorAggregate
 {
+
+	/**
+	 * Default CSV value delimiter.
+	 *
+	 * @var string
+	 */
+	const DEFAULT_DELIMITER = ",";
+
+	/**
+	 * Default CSV string enclosure.
+	 *
+	 * @var string
+	 */
+	const DEFAULT_ENCLOSURE = '"';
+
     /**
      * A full path to CSV file that is being written
      *
      * @var string
      */
     private $pathToFile;
-    
+
     /**
      * File pointer created by fopen function
      *
      * @var resource
      */
     protected $filePointer;
-    
-    /**
-     * @var string
-     */
-    private $fieldDelimiter = ",";
-    
-    /**
-     * @var string
-     */
-    private $fieldEnclosure = '"';
 
     /**
+	 * Delimiter for csv values.
+	 *
      * @var string
      */
-    private $lineTerminator = '\n';
-    
+    private $fieldDelimiter = self::DEFAULT_DELIMITER;
+
     /**
+	 * Delimiters for fields in one csv field.
+	 *
      * @var string
      */
-    private $iteratorClass = 'CSV_Iterator';
-    
+    private $fieldEnclosure = self::DEFAULT_ENCLOSURE;
+
     /**
+	 * Delimiter for a dataset.
+	 *
+     * @var string
+     */
+    private $lineTerminator = PHP_EOL;
+
+    /**
+	 * Determines if the writer shell append to current file.
+	 *
      * @var boolean
      */
     private $append = false;
 
+	/**
+	 * Stores Iterator instance.
+	 *
+	 * @var Iterator;
+	 */
+	private $iterator;
+
+	/**
+	 * Stores column names.
+	 *
+	 * @var array
+	 */
     private $columnNames;
-    
+
     /**
-     * Constructor only takes a full CSV file path and inits class properties
+     * Constructor only takes a full CSV file path and inits class properties.
      *
      * @param string $pathToFile
      * @param boolean $append If true then we will not truncate the file but allow appending to an existing file.
@@ -60,30 +90,30 @@ class CSV_File implements IteratorAggregate
         $this->pathToFile = $pathToFile;
         $this->append = $append;
     }
-    
+
     /**
      * @param string $delimiter
-     * @return CSV_File
+     * @return File
      */
     public function setFieldDelimiter($delimiter)
     {
         $this->fieldDelimiter = $delimiter;
         return $this;
     }
-    
+
     /**
      * @param string $enclosure
-     * @return CSV_File
+     * @return File
      */
     public function setFieldEnclosure($enclosure)
     {
         $this->fieldEnclosure = $enclosure;
         return $this;
     }
-    
+
     /**
      * @param string $terminator
-     * @return CSV_File
+     * @return File
      */
     public function setLineTerminator($terminator)
     {
@@ -93,26 +123,26 @@ class CSV_File implements IteratorAggregate
 
     /**
      * @param array $names
-     * @return CSV_File
+     * @return File
      */
     public function setColumnNames(array $names)
     {
         $this->columnNames = $names;
     }
-    
+
     /**
-     * Set a custom itertor class to use when looping over the data.
-     * This should be a subclass of CSV_FileIterator
-     * 
-     * @param string $className
-     * @return CSV_File
+     * Set a custom itertor to use when looping over the data.
+     * This should be a subclass of codeinthehole\csv\FileIterator
+     *
+     * @param codeinthehole\csv\Iterator $iterator
+     * @return codeinthehole\csv\File
      */
-    public function setIteratorClass($className)
+    public function setIterator($iterator)
     {
-        $this->iteratorClass = $className;
+        $this->iterator = $iterator;
         return $this;
     }
-    
+
     /**
      * Instantiate class properties and open file resource
      *
@@ -129,7 +159,7 @@ class CSV_File implements IteratorAggregate
             throw new RuntimeException("Unable to open file $this->pathToFile");
         }
     }
-    
+
     /**
      * @return void
      */
@@ -137,7 +167,7 @@ class CSV_File implements IteratorAggregate
     {
         $this->close();
     }
-    
+
     /**
      * @return string
      */
@@ -145,16 +175,16 @@ class CSV_File implements IteratorAggregate
     {
         return $this->getPath();
     }
-    
+
     // ============== //
     // PUBLIC METHODS //
     // ============== //
-    
+
     /**
      * Output contents of the array into a single line in CSV file, with separator specified in class constant
      *
      * @param array $contentArray
-     * @return mixed
+     * @return File
      */
     public function write(array $contentArray)
     {
@@ -167,10 +197,10 @@ class CSV_File implements IteratorAggregate
         }
         return $this;
     }
-    
+
     /**
      * @param array $contentMultiArray
-     * @return CSV_File
+     * @return File
      */
     public function writeAll(array $contentMultiArray)
     {
@@ -179,7 +209,7 @@ class CSV_File implements IteratorAggregate
         }
         return $this;
     }
-    
+
     /**
      * @return boolean
      */
@@ -187,7 +217,7 @@ class CSV_File implements IteratorAggregate
     {
         return file_exists($this->pathToFile);
     }
-    
+
     /**
      * @return int
      */
@@ -195,7 +225,7 @@ class CSV_File implements IteratorAggregate
     {
         return $this->exists() ? filesize($this->pathToFile) : null;
     }
-    
+
     /**
      * Close file resource (handle) using fclose
      *
@@ -206,7 +236,7 @@ class CSV_File implements IteratorAggregate
         if (is_resource($this->filePointer)) fclose($this->filePointer);
         return $this;
     }
-    
+
     /**
      * Close & delete CSV file
      *
@@ -227,7 +257,7 @@ class CSV_File implements IteratorAggregate
     {
         return $this->pathToFile;
     }
-    
+
     /**
      * @return string
      */
@@ -235,7 +265,7 @@ class CSV_File implements IteratorAggregate
     {
         return $this->fieldDelimiter;
     }
-    
+
     /**
      * @return string
      */
@@ -243,7 +273,7 @@ class CSV_File implements IteratorAggregate
     {
         return $this->fieldEnclosure;
     }
-    
+
     /**
      * @return string
      */
@@ -251,22 +281,33 @@ class CSV_File implements IteratorAggregate
     {
         return $this->lineTerminator;
     }
-  
+
     /**
-     * @return CSV_Iterator
+     * @return Iterator
      */
-    public function getIterator()
+    public function buildIterator()
     {
         if (!$this->exists()) {
             throw new RuntimeException("The file $this->pathToFile does not exist");
         }
-        $class = new $this->iteratorClass($this->pathToFile, $this->fieldDelimiter, $this->fieldEnclosure);    
+        $iterator = new Iterator($this->pathToFile, $this->fieldDelimiter, $this->fieldEnclosure);
         if ($this->columnNames) {
-            $class->setColumnNames($this->columnNames);
+            $iterator->setColumnNames($this->columnNames);
         }
-        return $class;
+        return $iterator;
     }
-    
+
+	/**
+	 * @return Iterator
+	 */
+	public function getIterator()
+	{
+		if (!$this->iterator) {
+			$this->iterator = $this->buildIterator();
+		}
+		return $this->iterator;
+	}
+
     /**
      * @return int
      */
